@@ -4,6 +4,15 @@
 import type { User, Product, Category } from '../types';
 import StorageService from './storageService';
 
+// Esto crea un objeto donde la llave es la ruta y el valor es la imagen procesada
+const allImages: Record<string, { default: string }> = import.meta.glob('../assets/*.{png,jpg,jpeg,gif}', { eager: true });
+
+// Función de ayuda para obtener la URL real
+const getAssetUrl = (name: string) => {
+    const path = `../assets/${name}`;
+    return allImages[path]?.default || 'https://via.placeholder.com/300';
+};
+
 export const initializeData = (): void => {
     // Inicializar usuarios por defecto
     const users = StorageService.getAllUsers();
@@ -78,7 +87,9 @@ export const initializeData = (): void => {
                 precio: 8990,
                 stock: 50,
                 stockCritico: 10,
-                imagen: 'https://via.placeholder.com/300x300/FF6B6B/FFFFFF?text=5kg',
+                imagen: getAssetUrl('adrink1.gif'),
+                //imagen: '/assets/adrink1.gif',
+                //imagen: 'https://via.placeholder.com/300x300/FF6B6B/FFFFFF?text=5kg',
                 estado: 'disponible'
             },
             {
@@ -89,7 +100,7 @@ export const initializeData = (): void => {
                 precio: 16990,
                 stock: 100,
                 stockCritico: 20,
-                imagen: 'https://via.placeholder.com/300x300/4ECDC4/FFFFFF?text=11kg',
+                imagen: getAssetUrl('11-kg.png'),
                 estado: 'disponible'
             },
             {
@@ -100,7 +111,7 @@ export const initializeData = (): void => {
                 precio: 22990,
                 stock: 75,
                 stockCritico: 15,
-                imagen: 'https://via.placeholder.com/300x300/45B7D1/FFFFFF?text=15kg',
+                imagen: getAssetUrl('15-kg.png'),
                 estado: 'disponible'
             }
         ];
