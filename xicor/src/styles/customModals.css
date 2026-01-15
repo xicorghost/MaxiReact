@@ -1,0 +1,206 @@
+/* styles/customModals.css */
+
+.modal-overlay-personalizado {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 99999;
+    animation: fadeIn 0.3s ease;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-overlay-personalizado.show {
+    display: flex;
+}
+
+.modal-box-personalizado {
+    background: white;
+    border-radius: 15px;
+    padding: 0;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.3s ease;
+    overflow: hidden;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header-personalizado {
+    padding: 25px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    color: white;
+    flex-shrink: 0;
+}
+
+.modal-header-personalizado svg {
+    flex-shrink: 0;
+}
+
+.modal-header-personalizado h3 {
+    margin: 0;
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.modal-header-personalizado.modal-header-success {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+}
+
+.modal-header-personalizado.modal-header-error {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+}
+
+.modal-header-personalizado.modal-header-warning {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.modal-header-personalizado.modal-header-info {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.modal-header-personalizado.modal-header-confirm {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.modal-body-personalizado {
+    padding: 30px 25px;
+    color: #333;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+.modal-body-personalizado strong {
+    color: #F23838;
+}
+
+.modal-body-personalizado p {
+    margin-bottom: 0.5rem;
+}
+
+.modal-body-personalizado p:last-child {
+    margin-bottom: 0;
+}
+
+.modal-input-personalizado {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    margin-top: 15px;
+    transition: border-color 0.3s;
+    font-family: inherit;
+}
+
+.modal-input-personalizado:focus {
+    outline: none;
+    border-color: #F23838;
+}
+
+.modal-footer-personalizado {
+    padding: 20px 25px;
+    border-top: 1px solid #e0e0e0;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    flex-shrink: 0;
+}
+
+.btn-modal-personalizado {
+    padding: 12px 30px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+
+.btn-modal-personalizado:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.btn-modal-personalizado:active {
+    transform: translateY(0);
+}
+
+.btn-modal-personalizado.btn-primary {
+    background: linear-gradient(135deg, #F23838 0%, #BF2121 100%);
+    color: white;
+}
+
+.btn-modal-personalizado.btn-success {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    color: white;
+}
+
+.btn-modal-personalizado.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(50px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+    .modal-box-personalizado {
+        width: 95%;
+        max-width: none;
+    }
+
+    .modal-header-personalizado {
+        padding: 20px;
+    }
+
+    .modal-header-personalizado h3 {
+        font-size: 1.1rem;
+    }
+
+    .modal-body-personalizado {
+        padding: 20px;
+        font-size: 1rem;
+    }
+
+    .modal-footer-personalizado {
+        padding: 15px 20px;
+        flex-direction: column;
+    }
+
+    .btn-modal-personalizado {
+        width: 100%;
+        padding: 10px 20px;
+    }
+}
