@@ -1,4 +1,4 @@
-// components/LoginModal.tsx
+// components/LoginModal.tsx (CORREGIDO - Sin alert)
 
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
@@ -7,17 +7,16 @@ interface LoginModalProps {
     show: boolean;
     onClose: () => void;
     onSuccess: () => void;
+    onError: (message: string) => void;
 }
 
-const LoginModal: React.FC<LoginModalProps> = ({ show, onClose, onSuccess }) => {
+const LoginModal: React.FC<LoginModalProps> = ({ show, onClose, onSuccess, onError }) => {
     const { login } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        setError('');
 
         const success = login(email, password);
 
@@ -27,7 +26,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ show, onClose, onSuccess }) => 
             onSuccess();
             onClose();
         } else {
-            setError('Correo o contraseña incorrectos');
+            onError('Correo o contraseña incorrectos');
         }
     };
 
@@ -42,9 +41,6 @@ const LoginModal: React.FC<LoginModalProps> = ({ show, onClose, onSuccess }) => 
                         <button type="button" className="btn-close btn-close-white" onClick={onClose}></button>
                     </div>
                     <div className="modal-body">
-                        {error && (
-                            <div className="alert alert-danger">{error}</div>
-                        )}
                         <form onSubmit={handleSubmit}>
                             <div className="mb-3">
                                 <label className="form-label">Correo Electrónico</label>

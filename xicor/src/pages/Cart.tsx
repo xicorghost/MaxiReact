@@ -1,4 +1,4 @@
-// pages/Cart.tsx
+// pages/Cart.tsx (CORREGIDO - Sin alert)
 
 import React, { useState } from 'react';
 import { ShoppingCart, Trash2, Plus, Minus } from 'lucide-react';
@@ -44,6 +44,11 @@ const Cart: React.FC<CartProps> = ({ cart, onUpdateQuantity, onRemoveItem, onChe
         });
     };
 
+    const handleUpdateQuantity = (productId: number, change: number) => {
+        const success = onUpdateQuantity(productId, change);
+        // El mensaje de error se maneja en el componente padre con modales
+    };
+
     return (
         <div className="container my-5">
             <h2 className="text-danger mb-4">
@@ -84,7 +89,7 @@ const Cart: React.FC<CartProps> = ({ cart, onUpdateQuantity, onRemoveItem, onChe
                                                     <div className="btn-group mb-2">
                                                         <button
                                                             className="btn btn-sm btn-outline-secondary"
-                                                            onClick={() => onUpdateQuantity(item.id, -1)}
+                                                            onClick={() => handleUpdateQuantity(item.id, -1)}
                                                         >
                                                             <Minus size={16} />
                                                         </button>
@@ -93,12 +98,7 @@ const Cart: React.FC<CartProps> = ({ cart, onUpdateQuantity, onRemoveItem, onChe
                                                         </button>
                                                         <button
                                                             className="btn btn-sm btn-outline-secondary"
-                                                            onClick={() => {
-                                                                const success = onUpdateQuantity(item.id, 1);
-                                                                if (!success) {
-                                                                    alert('No hay suficiente stock disponible');
-                                                                }
-                                                            }}
+                                                            onClick={() => handleUpdateQuantity(item.id, 1)}
                                                         >
                                                             <Plus size={16} />
                                                         </button>

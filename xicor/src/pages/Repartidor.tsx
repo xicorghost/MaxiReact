@@ -1,14 +1,15 @@
-// pages/Repartidor.tsx
+// pages/Repartidor.tsx (CORREGIDO)
 
 import React, { useState, useEffect } from 'react';
 import { Truck, Clock, CheckCircle, MapPin, Phone, User, Package } from 'lucide-react';
 import type { Order } from '../types';
 import StorageService from '../services/storageService';
 import { useAuth } from '../context/AuthContext';
+import { useCustomModal } from '../components/CustomModals';
 import WhatsAppButton from '../components/WhatsAppButton';
 
 const Repartidor: React.FC = () => {
-    const { currentUser, updateProfile } = useAuth();
+    const { currentUser, updateProfile, logout } = useAuth();
     const [orders, setOrders] = useState<Order[]>([]);
     const [disponible, setDisponible] = useState(true);
     const [stats, setStats] = useState({
@@ -16,6 +17,13 @@ const Repartidor: React.FC = () => {
         completadas: 0,
         total: 0
     });
+
+    // Sistema de modales personalizados
+    const {
+        CustomModalComponent,
+        exito,
+        confirmar
+    } = useCustomModal();
 
     useEffect(() => {
         if (currentUser) {
@@ -78,8 +86,9 @@ const Repartidor: React.FC = () => {
         }
     };
 
-    const handleIniciarRuta = (numeroSolicitud: string) => {
-        if (!window.confirm('¿Confirmas que vas a iniciar la ruta de entrega?')) return;
+    const handleIniciarRuta = async (numeroSolicitud: string) => {
+        const confirmado = await confirmar('¿Confirmas que vas a iniciar la ruta de entrega?');
+        if (!confirmado) return;
 
         const allOrders = StorageService.getOrders();
         const orderIndex = allOrders.findIndex(o => o.numeroSolicitud === numeroSolicitud);
@@ -91,12 +100,13 @@ const Repartidor: React.FC = () => {
 
             loadOrders();
             updateStats();
-            alert('¡Ruta iniciada! Buena suerte con la entrega.');
+            await exito('¡Ruta iniciada! Buena suerte con la entrega.');
         }
     };
 
-    const handleCompletarEntrega = (numeroSolicitud: string) => {
-        if (!window.confirm('¿Confirmas que el pedido ha sido entregado exitosamente?')) return;
+    const handleCompletarEntrega = async (numeroSolicitud: string) => {
+        const confirmado = await confirmar('¿Confirmas que el pedido ha sido entregado exitosamente?');
+        if (!confirmado) return;
 
         const allOrders = StorageService.getOrders();
         const orderIndex = allOrders.findIndex(o => o.numeroSolicitud === numeroSolicitud);
@@ -108,7 +118,15 @@ const Repartidor: React.FC = () => {
 
             loadOrders();
             updateStats();
-            alert('¡Entrega confirmada! El pedido se ha marcado como entregado.');
+            await exito('¡Entrega confirmada! El pedido se ha marcado como entregado exitosamente.');
+        }
+    };
+
+    const handleCerrarSesion = async () => {
+        const confirmado = await confirmar('¿Estás seguro que deseas cerrar sesión?');
+        if (confirmado) {
+            logout();
+            window.location.href = '/';
         }
     };
 
@@ -124,11 +142,7 @@ const Repartidor: React.FC = () => {
                     </a>
                     <button
                         className="btn btn-outline-light"
-                        onClick={() => {
-                            if (window.confirm('¿Estás seguro que deseas cerrar sesión?')) {
-                                window.location.href = '/';
-                            }
-                        }}
+                        onClick={handleCerrarSesion}
                     >
                         Cerrar Sesión
                     </button>
@@ -284,6 +298,9 @@ const Repartidor: React.FC = () => {
             <footer className="bg-dark text-white text-center py-3 mt-5">
                 <p className="mb-0">&copy; 2025 MaxiGas - Panel Repartidor</p>
             </footer>
+
+            {/* Sistema de modales personalizados */}
+            <CustomModalComponent />
         </div>
     );
 };

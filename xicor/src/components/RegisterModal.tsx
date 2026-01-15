@@ -1,4 +1,4 @@
-// components/RegisterModal.tsx
+// components/RegisterModal.tsx (CORREGIDO - Sin alert)
 
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
@@ -8,9 +8,10 @@ interface RegisterModalProps {
     show: boolean;
     onClose: () => void;
     onSuccess: () => void;
+    onError: (message: string) => void;
 }
 
-const RegisterModal: React.FC<RegisterModalProps> = ({ show, onClose, onSuccess }) => {
+const RegisterModal: React.FC<RegisterModalProps> = ({ show, onClose, onSuccess, onError }) => {
     const { register } = useAuth();
     const [formData, setFormData] = useState({
         nombre: '',
@@ -20,7 +21,6 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ show, onClose, onSuccess 
         email: '',
         password: ''
     });
-    const [error, setError] = useState('');
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({
@@ -31,36 +31,35 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ show, onClose, onSuccess 
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        setError('');
 
         // Validaciones
         if (!ValidationService.validarTexto(formData.nombre)) {
-            setError('El nombre solo debe contener letras');
+            onError('El nombre solo debe contener letras');
             return;
         }
 
         if (!ValidationService.validarTexto(formData.apellidos)) {
-            setError('Los apellidos solo deben contener letras');
+            onError('Los apellidos solo deben contener letras');
             return;
         }
 
         if (!ValidationService.validarRUT(formData.rut)) {
-            setError('El RUT ingresado no es válido');
+            onError('El RUT ingresado no es válido');
             return;
         }
 
         if (!ValidationService.validarEdad(formData.fechaNacimiento)) {
-            setError('Debes ser mayor de 18 años');
+            onError('Debes ser mayor de 18 años');
             return;
         }
 
         if (!ValidationService.validarEmail(formData.email)) {
-            setError('El correo electrónico no es válido');
+            onError('El correo electrónico no es válido');
             return;
         }
 
         if (!ValidationService.validarContrasena(formData.password)) {
-            setError('La contraseña debe tener mínimo 8 caracteres, una mayúscula, una minúscula y un número');
+            onError('La contraseña debe tener mínimo 8 caracteres, una mayúscula, una minúscula y un número');
             return;
         }
 
@@ -80,9 +79,8 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ show, onClose, onSuccess 
             });
             onSuccess();
             onClose();
-            alert('¡Registro exitoso!');
         } else {
-            setError('Ya existe un usuario con este correo o RUT');
+            onError('Ya existe un usuario con este correo o RUT');
         }
     };
 
@@ -97,9 +95,6 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ show, onClose, onSuccess 
                         <button type="button" className="btn-close btn-close-white" onClick={onClose}></button>
                     </div>
                     <div className="modal-body">
-                        {error && (
-                            <div className="alert alert-danger">{error}</div>
-                        )}
                         <form onSubmit={handleSubmit}>
                             <div className="row g-3">
                                 <div className="col-md-6">

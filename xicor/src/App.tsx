@@ -1,22 +1,9 @@
-/*import { useState } from 'react'
-
-
-function App() {
-
-  return (
-    <>
-      
-    </>
-  )
-}
-
-export default <App></App>*/
-
-// App.tsx
+// App.tsx (CORREGIDO - Todo con modales personalizados)
 
 import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { useCart } from './hooks/useCart';
+import { useCustomModal } from './components/CustomModals';
 import type { Product, Order } from './types';
 import StorageService from './services/storageService';
 import { initializeData } from './services/initData';
@@ -42,6 +29,15 @@ const AppContent: React.FC = () => {
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [userOrders, setUserOrders] = useState<Order[]>([]);
+
+  // Sistema de modales personalizados
+  const {
+    CustomModalComponent,
+    alerta,
+    exito,
+    error,
+    advertencia
+  } = useCustomModal();
 
   const { cart, addToCart, removeFromCart, updateQuantity, clearCart, getItemCount } = useCart(currentUser?.id || null);
 
@@ -78,16 +74,22 @@ const AppContent: React.FC = () => {
     }
   };
 
-  const handleAddToCart = (product: Product) => {
+  const handleAddToCart = async (product: Product) => {
+    if (!currentUser) {
+      await error('Debes iniciar sesión para agregar productos al carrito');
+      setShowLoginModal(true);
+      return;
+    }
+
     const success = addToCart(product);
     if (success) {
-      alert(`${product.nombre} agregado al carrito`);
+      await exito(`${product.nombre} agregado al carrito`);
     } else {
-      alert('No hay suficiente stock disponible');
+      await error('No hay suficiente stock disponible');
     }
   };
 
-  const handleCheckout = (orderData: { direccion: string; comuna: string; telefono: string; metodoPago: string }) => {
+  const handleCheckout = async (orderData: { direccion: string; comuna: string; telefono: string; metodoPago: string }) => {
     if (!currentUser || cart.length === 0) return;
 
     const subtotal = cart.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
@@ -123,29 +125,55 @@ const AppContent: React.FC = () => {
     clearCart();
     loadProducts();
     loadUserOrders();
-    alert(`¡Pedido realizado con éxito! N° ${newOrder.numeroSolicitud}`);
+    await exito(`¡Pedido realizado con éxito!<br><strong>N° ${newOrder.numeroSolicitud}</strong>`);
     setView('home');
   };
 
-  const handleLoginSuccess = () => {
+  const handleLoginSuccess = async () => {
     loadUserOrders();
+    if (currentUser) {
+      await exito(`¡Bienvenido ${currentUser.nombre}!`);
+    }
+  };
+
+  const handleLoginError = async (message: string) => {
+    await error(message);
+  };
+
+  const handleRegisterSuccess = async () => {
+    loadUserOrders();
+    await exito('¡Registro exitoso! Bienvenido a MaxiGas');
+  };
+
+  const handleRegisterError = async (message: string) => {
+    await error(message);
   };
 
   // Si es admin, mostrar panel de admin
   if (isAdmin) {
-    return <AdminDashboard />;
+    return (
+      <>
+        <AdminDashboard />
+        <CustomModalComponent />
+      </>
+    );
   }
 
   // Si es repartidor, mostrar panel de repartidor
   if (isRepartidor) {
-    return <Repartidor />;
+    return (
+      <>
+        <Repartidor />
+        <CustomModalComponent />
+      </>
+    );
   }
 
   // Vista de cliente
   return (
     <div className="min-vh-100 bg-light">
-      <Navbar 
-        cartCount={getItemCount()} 
+      <Navbar
+        cartCount={getItemCount()}
         onNavigate={(newView) => setView(newView as View)}
       />
 
@@ -155,7 +183,7 @@ const AppContent: React.FC = () => {
         )}
 
         {view === 'cart' && (
-          <Cart 
+          <Cart
             cart={cart}
             onUpdateQuantity={updateQuantity}
             onRemoveItem={removeFromCart}
@@ -165,7 +193,7 @@ const AppContent: React.FC = () => {
         )}
 
         {view === 'orders' && (
-          <Orders 
+          <Orders
             orders={userOrders}
             onBack={() => setView('home')}
           />
@@ -200,17 +228,22 @@ const AppContent: React.FC = () => {
       </footer>
 
       {/* Modales */}
-      <LoginModal 
+      <LoginModal
         show={showLoginModal}
         onClose={() => setShowLoginModal(false)}
         onSuccess={handleLoginSuccess}
+        onError={handleLoginError}
       />
 
-      <RegisterModal 
+      <RegisterModal
         show={showRegisterModal}
         onClose={() => setShowRegisterModal(false)}
-        onSuccess={handleLoginSuccess}
+        onSuccess={handleRegisterSuccess}
+        onError={handleRegisterError}
       />
+
+      {/* Sistema de modales personalizados */}
+      <CustomModalComponent />
     </div>
   );
 };

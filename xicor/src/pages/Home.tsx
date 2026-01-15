@@ -1,4 +1,4 @@
-// pages/Home.tsx
+// pages/Home.tsx (CORREGIDO - Sin alert)
 
 import React, { useState, useEffect } from 'react';
 import type { Product } from '../types';
@@ -26,7 +26,7 @@ const Home: React.FC<HomeProps> = ({ onAddToCart }) => {
 
     const handleAddToCart = (product: Product) => {
         if (!isAuthenticated) {
-            alert('Debes iniciar sesión para agregar productos al carrito');
+            // Este mensaje se maneja en App.tsx con modales personalizados
             return;
         }
         onAddToCart(product);
