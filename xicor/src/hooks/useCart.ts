@@ -1,4 +1,4 @@
-// hooks/useCart.ts
+// hooks/useCart.ts (USA sessionStorage - CARRITO POR PESTAÑA)
 
 import { useState, useEffect } from 'react';
 import type { CartItem, Product } from '../types';
@@ -21,6 +21,7 @@ export const useCart = (userId: number | null): UseCartReturn => {
 
     useEffect(() => {
         if (userId) {
+            // Cargar carrito desde sessionStorage (específico de esta pestaña)
             const savedCart = StorageService.getCart(userId);
             setCart(savedCart);
         } else {
@@ -38,7 +39,7 @@ export const useCart = (userId: number | null): UseCartReturn => {
             if (existingItem.cantidad < product.stock) {
                 existingItem.cantidad++;
             } else {
-                return false; // No hay suficiente stock
+                return false;
             }
         } else {
             newCart.push({
@@ -51,7 +52,7 @@ export const useCart = (userId: number | null): UseCartReturn => {
         }
 
         setCart(newCart);
-        StorageService.setCart(userId, newCart);
+        StorageService.setCart(userId, newCart); // sessionStorage
         return true;
     };
 
@@ -78,10 +79,9 @@ export const useCart = (userId: number | null): UseCartReturn => {
             return true;
         }
 
-        // Verificar stock disponible
         const product = StorageService.findProductById(productId);
         if (product && newQuantity > product.stock) {
-            return false; // No hay suficiente stock
+            return false;
         }
 
         item.cantidad = newQuantity;

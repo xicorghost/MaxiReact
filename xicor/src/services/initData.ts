@@ -1,6 +1,5 @@
 // services/initData.ts
 
-// services/initData.ts
 import type { User, Product, Category } from '../types';
 import StorageService from './storageService';
 

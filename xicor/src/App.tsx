@@ -1,9 +1,10 @@
-// App.tsx (CORREGIDO - Todo con modales personalizados)
+// App.tsx (CON TOASTS Y PERFIL)
 
 import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { useCart } from './hooks/useCart';
 import { useCustomModal } from './components/CustomModals';
+import { ToastProvider, useToast } from './components/ToastNotification';
 import type { Product, Order } from './types';
 import StorageService from './services/storageService';
 import { initializeData } from './services/initData';
@@ -12,6 +13,7 @@ import { initializeData } from './services/initData';
 import Home from './pages/Home';
 import Cart from './pages/Cart';
 import Orders from './pages/Orders';
+import Profile from './pages/Profile';
 import Repartidor from './pages/Repartidor';
 import AdminDashboard from './pages/AdminDashboard';
 
@@ -33,11 +35,12 @@ const AppContent: React.FC = () => {
   // Sistema de modales personalizados
   const {
     CustomModalComponent,
-    alerta,
     exito,
-    error,
-    advertencia
+    error
   } = useCustomModal();
+
+  // Sistema de toasts
+  const { showToast } = useToast();
 
   const { cart, addToCart, removeFromCart, updateQuantity, clearCart, getItemCount } = useCart(currentUser?.id || null);
 
@@ -83,9 +86,9 @@ const AppContent: React.FC = () => {
 
     const success = addToCart(product);
     if (success) {
-      await exito(`${product.nombre} agregado al carrito`);
+      showToast('success', `${product.nombre} agregado al carrito`);
     } else {
-      await error('No hay suficiente stock disponible');
+      showToast('error', 'No hay suficiente stock disponible');
     }
   };
 
@@ -125,6 +128,8 @@ const AppContent: React.FC = () => {
     clearCart();
     loadProducts();
     loadUserOrders();
+    
+    showToast('success', `Pedido #${newOrder.numeroSolicitud} realizado con éxito`);
     await exito(`¡Pedido realizado con éxito!<br><strong>N° ${newOrder.numeroSolicitud}</strong>`);
     setView('home');
   };
@@ -132,21 +137,21 @@ const AppContent: React.FC = () => {
   const handleLoginSuccess = async () => {
     loadUserOrders();
     if (currentUser) {
-      await exito(`¡Bienvenido ${currentUser.nombre}!`);
+      showToast('success', `¡Bienvenido ${currentUser.nombre}!`);
     }
   };
 
   const handleLoginError = async (message: string) => {
-    await error(message);
+    showToast('error', message);
   };
 
   const handleRegisterSuccess = async () => {
     loadUserOrders();
-    await exito('¡Registro exitoso! Bienvenido a MaxiGas');
+    showToast('success', '¡Registro exitoso! Bienvenido a MaxiGas');
   };
 
   const handleRegisterError = async (message: string) => {
-    await error(message);
+    showToast('error', message);
   };
 
   // Si es admin, mostrar panel de admin
@@ -172,8 +177,8 @@ const AppContent: React.FC = () => {
   // Vista de cliente
   return (
     <div className="min-vh-100 bg-light">
-      <Navbar
-        cartCount={getItemCount()}
+      <Navbar 
+        cartCount={getItemCount()} 
         onNavigate={(newView) => setView(newView as View)}
       />
 
@@ -183,7 +188,7 @@ const AppContent: React.FC = () => {
         )}
 
         {view === 'cart' && (
-          <Cart
+          <Cart 
             cart={cart}
             onUpdateQuantity={updateQuantity}
             onRemoveItem={removeFromCart}
@@ -193,8 +198,14 @@ const AppContent: React.FC = () => {
         )}
 
         {view === 'orders' && (
-          <Orders
+          <Orders 
             orders={userOrders}
+            onBack={() => setView('home')}
+          />
+        )}
+
+        {view === 'profile' && (
+          <Profile 
             onBack={() => setView('home')}
           />
         )}
@@ -228,14 +239,14 @@ const AppContent: React.FC = () => {
       </footer>
 
       {/* Modales */}
-      <LoginModal
+      <LoginModal 
         show={showLoginModal}
         onClose={() => setShowLoginModal(false)}
         onSuccess={handleLoginSuccess}
         onError={handleLoginError}
       />
 
-      <RegisterModal
+      <RegisterModal 
         show={showRegisterModal}
         onClose={() => setShowRegisterModal(false)}
         onSuccess={handleRegisterSuccess}
@@ -251,7 +262,9 @@ const AppContent: React.FC = () => {
 const App: React.FC = () => {
   return (
     <AuthProvider>
-      <AppContent />
+      <ToastProvider>
+        <AppContent />
+      </ToastProvider>
     </AuthProvider>
   );
 };

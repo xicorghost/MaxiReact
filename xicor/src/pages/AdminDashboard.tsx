@@ -1,4 +1,4 @@
-// pages/AdminDashboard.tsx (CON CRUD DE USUARIOS COMPLETO)
+// pages/AdminDashboard.tsx (CON SINCRONIZACIÓN AUTOMÁTICA)
 
 import React, { useState, useEffect } from 'react';
 import {
@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import type { Order, Product, User as UserType, Category, DashboardStats } from '../types';
 import StorageService from '../services/storageService';
+import StorageSyncService from '../services/storageSyncService';
 import { useAuth } from '../context/AuthContext';
 import { useCustomModal } from '../components/CustomModals';
 
@@ -15,6 +16,7 @@ import { OrdersSection } from '../components/admin/OrdersSection';
 import { ProductsSection } from '../components/admin/ProductsSection';
 import { CategoriesSection } from '../components/admin/CategoriesSection';
 import { UsersSection } from '../components/admin/UsersSection';
+import { ReportsSection } from '../components/admin/ReportsSection';
 
 type AdminSection = 'dashboard' | 'ordenes' | 'productos' | 'categorias' | 'usuarios' | 'reportes';
 
@@ -42,6 +44,14 @@ const AdminDashboard: React.FC = () => {
 
     useEffect(() => {
         loadData();
+
+        // Suscribirse a cambios de sincronización
+        const unsubscribe = StorageSyncService.subscribe(() => {
+            console.log('🔄 AdminDashboard: Recargando datos desde otra pestaña...');
+            loadData();
+        });
+
+        return () => unsubscribe();
     }, []);
 
     const loadData = () => {
@@ -93,6 +103,7 @@ const AdminDashboard: React.FC = () => {
                 await exito(`Producto "${newProduct.nombre}" creado correctamente`);
             }
             loadData();
+            StorageSyncService.triggerSync();
         } catch (err) {
             await error('Ocurrió un error al guardar el producto');
         }
@@ -108,6 +119,7 @@ const AdminDashboard: React.FC = () => {
             StorageService.deleteProduct(product.id);
             await exito(`Producto "${product.nombre}" eliminado correctamente`);
             loadData();
+            StorageSyncService.triggerSync();
         }
     };
 
@@ -118,6 +130,7 @@ const AdminDashboard: React.FC = () => {
             StorageService.updateProduct(product);
             await exito(`Se agregaron ${cantidad} unidades al stock de "${product.nombre}"`);
             loadData();
+            StorageSyncService.triggerSync();
         }
     };
 
@@ -158,6 +171,7 @@ const AdminDashboard: React.FC = () => {
                 await exito(`Categoría "${newCategory.nombre}" creada correctamente`);
             }
             loadData();
+            StorageSyncService.triggerSync();
         } catch (err) {
             await error('Ocurrió un error al guardar la categoría');
         }
@@ -183,6 +197,7 @@ const AdminDashboard: React.FC = () => {
             StorageService.deleteCategory(category.id);
             await exito(`Categoría "${category.nombre}" eliminada correctamente`);
             loadData();
+            StorageSyncService.triggerSync();
         }
     };
 
@@ -203,6 +218,7 @@ const AdminDashboard: React.FC = () => {
 
             StorageService.setOrders(allOrders);
             loadData();
+            StorageSyncService.triggerSync();
             await exito(`Pedido asignado a ${repartidor.nombre}`);
         }
     };
@@ -229,6 +245,7 @@ const AdminDashboard: React.FC = () => {
             StorageService.setProducts(allProducts);
             StorageService.setOrders(allOrders);
             loadData();
+            StorageSyncService.triggerSync();
             await exito('Pedido cancelado y stock devuelto');
         }
     };
@@ -240,11 +257,9 @@ const AdminDashboard: React.FC = () => {
     const handleSaveUser = async (userData: Omit<UserType, 'id' | 'fechaRegistro' | 'foto'> | UserType) => {
         try {
             if ('id' in userData) {
-                // Editar usuario existente
                 StorageService.updateUser(userData as UserType);
                 await exito('Usuario actualizado correctamente');
             } else {
-                // Verificar que no exista el usuario
                 const existingUserByEmail = StorageService.findUserByEmail(userData.email);
                 const existingUserByRut = StorageService.findUserByRut(userData.rut);
 
@@ -253,7 +268,6 @@ const AdminDashboard: React.FC = () => {
                     return;
                 }
 
-                // Crear nuevo usuario
                 const newUser: UserType = {
                     ...userData,
                     id: Date.now(),
@@ -265,6 +279,7 @@ const AdminDashboard: React.FC = () => {
                 await exito(`Usuario "${newUser.nombre} ${newUser.apellidos}" registrado correctamente`);
             }
             loadData();
+            StorageSyncService.triggerSync();
         } catch (err) {
             await error('Ocurrió un error al guardar el usuario');
         }
@@ -285,6 +300,7 @@ const AdminDashboard: React.FC = () => {
             StorageService.deleteUser(user.id);
             await exito(`Usuario "${user.nombre} ${user.apellidos}" eliminado correctamente`);
             loadData();
+            StorageSyncService.triggerSync();
         }
     };
 
@@ -388,10 +404,11 @@ const AdminDashboard: React.FC = () => {
                     )}
 
                     {activeSection === 'reportes' && (
-                        <div>
-                            <h2 className="mb-4">Reportes y Estadísticas</h2>
-                            <p className="text-muted">Sección en construcción...</p>
-                        </div>
+                        <ReportsSection
+                            orders={orders}
+                            products={products}
+                            users={users}
+                        />
                     )}
                 </main>
             </div>

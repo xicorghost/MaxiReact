@@ -1,11 +1,10 @@
-// services/storageService.ts
+// services/storageService.ts (SESIONES INDEPENDIENTES POR PESTAÑA)
 
-// services/storageService.ts
 import type { User, Product, Order, Category, CartItem } from '../types';
 
 class StorageService {
     // ============================================
-    // USUARIOS
+    // USUARIOS (localStorage - compartido)
     // ============================================
 
     static getUsers(): User[] {
@@ -57,7 +56,7 @@ class StorageService {
     }
 
     // ============================================
-    // PRODUCTOS
+    // PRODUCTOS (localStorage - compartido)
     // ============================================
 
     static getProducts(): Product[] {
@@ -93,7 +92,7 @@ class StorageService {
     }
 
     // ============================================
-    // PEDIDOS
+    // PEDIDOS (localStorage - compartido)
     // ============================================
 
     static getOrders(): Order[] {
@@ -136,7 +135,7 @@ class StorageService {
     }
 
     // ============================================
-    // CATEGORÍAS
+    // CATEGORÍAS (localStorage - compartido)
     // ============================================
 
     static getCategories(): Category[] {
@@ -159,36 +158,37 @@ class StorageService {
     }
 
     // ============================================
-    // CARRITO
+    // CARRITO (sessionStorage - por pestaña)
     // ============================================
 
     static getCart(userId: number): CartItem[] {
-        return JSON.parse(localStorage.getItem(`carrito_${userId}`) || '[]');
+        return JSON.parse(sessionStorage.getItem(`carrito_${userId}`) || '[]');
     }
 
     static setCart(userId: number, cart: CartItem[]): void {
-        localStorage.setItem(`carrito_${userId}`, JSON.stringify(cart));
+        sessionStorage.setItem(`carrito_${userId}`, JSON.stringify(cart));
     }
 
     static clearCart(userId: number): void {
-        localStorage.removeItem(`carrito_${userId}`);
+        sessionStorage.removeItem(`carrito_${userId}`);
     }
 
     // ============================================
-    // SESIÓN ACTUAL
+    // SESIÓN ACTUAL (sessionStorage - por pestaña)
+    // ⚠️ CAMBIO CRÍTICO: Ahora usa sessionStorage
     // ============================================
 
     static getCurrentUser(): User | null {
-        const userData = localStorage.getItem('usuarioActual');
+        const userData = sessionStorage.getItem('usuarioActual');
         return userData ? JSON.parse(userData) : null;
     }
 
     static setCurrentUser(user: User): void {
-        localStorage.setItem('usuarioActual', JSON.stringify(user));
+        sessionStorage.setItem('usuarioActual', JSON.stringify(user));
     }
 
     static clearCurrentUser(): void {
-        localStorage.removeItem('usuarioActual');
+        sessionStorage.removeItem('usuarioActual');
     }
 }
 

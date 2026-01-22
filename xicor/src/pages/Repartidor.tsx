@@ -1,12 +1,15 @@
-// pages/Repartidor.tsx (CORREGIDO)
+// pages/Repartidor.tsx (CON HISTORIAL Y SINCRONIZACIÓN)
 
 import React, { useState, useEffect } from 'react';
 import { Truck, Clock, CheckCircle, MapPin, Phone, User, Package } from 'lucide-react';
 import type { Order } from '../types';
 import StorageService from '../services/storageService';
+import StorageSyncService from '../services/storageSyncService';
 import { useAuth } from '../context/AuthContext';
 import { useCustomModal } from '../components/CustomModals';
 import WhatsAppButton from '../components/WhatsAppButton';
+
+type HistorialType = 'pendientes' | 'completadas' | 'total' | null;
 
 const Repartidor: React.FC = () => {
     const { currentUser, updateProfile, logout } = useAuth();
@@ -17,8 +20,10 @@ const Repartidor: React.FC = () => {
         completadas: 0,
         total: 0
     });
+    const [showHistorialModal, setShowHistorialModal] = useState(false);
+    const [historialType, setHistorialType] = useState<HistorialType>(null);
+    const [historialOrders, setHistorialOrders] = useState<Order[]>([]);
 
-    // Sistema de modales personalizados
     const {
         CustomModalComponent,
         exito,
@@ -31,6 +36,15 @@ const Repartidor: React.FC = () => {
             loadOrders();
             updateStats();
         }
+
+        // Suscribirse a cambios de sincronización
+        const unsubscribe = StorageSyncService.subscribe(() => {
+            console.log('🔄 Repartidor: Recargando pedidos desde otra pestaña...');
+            loadOrders();
+            updateStats();
+        });
+
+        return () => unsubscribe();
     }, [currentUser]);
 
     const loadOrders = () => {
@@ -76,12 +90,12 @@ const Repartidor: React.FC = () => {
         if (currentUser) {
             updateProfile({ disponible: nuevoEstado });
 
-            // Actualizar en la lista de usuarios
             const usuarios = StorageService.getAllUsers();
             const index = usuarios.findIndex(u => u.id === currentUser.id);
             if (index !== -1) {
                 usuarios[index].disponible = nuevoEstado;
                 StorageService.setUsers(usuarios);
+                StorageSyncService.triggerSync();
             }
         }
     };
@@ -100,6 +114,7 @@ const Repartidor: React.FC = () => {
 
             loadOrders();
             updateStats();
+            StorageSyncService.triggerSync();
             await exito('¡Ruta iniciada! Buena suerte con la entrega.');
         }
     };
@@ -118,6 +133,7 @@ const Repartidor: React.FC = () => {
 
             loadOrders();
             updateStats();
+            StorageSyncService.triggerSync();
             await exito('¡Entrega confirmada! El pedido se ha marcado como entregado exitosamente.');
         }
     };
@@ -130,11 +146,69 @@ const Repartidor: React.FC = () => {
         }
     };
 
+    const handleOpenHistorial = (type: HistorialType) => {
+        if (!currentUser) return;
+
+        const allOrders = StorageService.getOrders();
+        const today = new Date().toDateString();
+        let filteredOrders: Order[] = [];
+
+        switch (type) {
+            case 'pendientes':
+                filteredOrders = allOrders.filter(
+                    o => o.repartidorAsignado === currentUser.id &&
+                        (o.estado === 'Asignado' || o.estado === 'En Ruta')
+                );
+                break;
+            case 'completadas':
+                filteredOrders = allOrders.filter(
+                    o => o.repartidorAsignado === currentUser.id &&
+                        o.estado === 'Entregado' &&
+                        o.horaEntrega &&
+                        new Date(o.horaEntrega).toDateString() === today
+                );
+                break;
+            case 'total':
+                filteredOrders = allOrders.filter(
+                    o => o.repartidorAsignado === currentUser.id &&
+                        new Date(o.fecha).toDateString() === today
+                );
+                break;
+        }
+
+        setHistorialOrders(filteredOrders);
+        setHistorialType(type);
+        setShowHistorialModal(true);
+    };
+
+    const getModalTitle = () => {
+        switch (historialType) {
+            case 'pendientes':
+                return 'Entregas Pendientes';
+            case 'completadas':
+                return 'Entregas Completadas Hoy';
+            case 'total':
+                return 'Total de Entregas del Día';
+            default:
+                return 'Historial';
+        }
+    };
+
+    const getBadgeClass = (estado: string) => {
+        switch (estado) {
+            case 'Pendiente': return 'bg-warning text-dark';
+            case 'Asignado': return 'bg-info';
+            case 'En Ruta': return 'bg-primary';
+            case 'Entregado': return 'bg-success';
+            case 'Cancelado': return 'bg-danger';
+            default: return 'bg-secondary';
+        }
+    };
+
     if (!currentUser) return null;
 
     return (
         <div className="min-vh-100 bg-light">
-            {/* Navbar */}
             <nav className="navbar navbar-dark bg-danger shadow-sm">
                 <div className="container-fluid">
                     <a className="navbar-brand fw-bold fs-4" href="#">
@@ -150,7 +224,6 @@ const Repartidor: React.FC = () => {
             </nav>
 
             <main className="container my-4">
-                {/* Header */}
                 <div className="text-center mb-4">
                     <h2 className="text-danger fw-bold">Panel de Entregas</h2>
                     <p className="lead">
@@ -158,7 +231,6 @@ const Repartidor: React.FC = () => {
                     </p>
                 </div>
 
-                {/* Estado de Disponibilidad */}
                 <div className="card shadow-sm mb-4 border-info border-2">
                     <div className="card-body">
                         <div className="d-flex justify-content-between align-items-center">
@@ -184,38 +256,57 @@ const Repartidor: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Estadísticas */}
                 <div className="row g-4 mb-4">
                     <div className="col-md-4">
-                        <div className="card shadow-sm border-warning border-2">
+                        <div 
+                            className="card shadow-sm border-warning border-2 h-100"
+                            style={{ cursor: 'pointer', transition: 'transform 0.2s' }}
+                            onClick={() => handleOpenHistorial('pendientes')}
+                            onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                        >
                             <div className="card-body text-center">
                                 <Clock className="text-warning" size={48} />
                                 <h3 className="mt-2">Entregas Pendientes</h3>
                                 <p className="display-4 fw-bold text-warning mb-0">{stats.pendientes}</p>
+                                <small className="text-muted">Click para ver detalles</small>
                             </div>
                         </div>
                     </div>
                     <div className="col-md-4">
-                        <div className="card shadow-sm border-success border-2">
+                        <div 
+                            className="card shadow-sm border-success border-2 h-100"
+                            style={{ cursor: 'pointer', transition: 'transform 0.2s' }}
+                            onClick={() => handleOpenHistorial('completadas')}
+                            onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                        >
                             <div className="card-body text-center">
                                 <CheckCircle className="text-success" size={48} />
                                 <h3 className="mt-2">Completadas Hoy</h3>
                                 <p className="display-4 fw-bold text-success mb-0">{stats.completadas}</p>
+                                <small className="text-muted">Click para ver detalles</small>
                             </div>
                         </div>
                     </div>
                     <div className="col-md-4">
-                        <div className="card shadow-sm border-primary border-2">
+                        <div 
+                            className="card shadow-sm border-primary border-2 h-100"
+                            style={{ cursor: 'pointer', transition: 'transform 0.2s' }}
+                            onClick={() => handleOpenHistorial('total')}
+                            onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                        >
                             <div className="card-body text-center">
                                 <Package className="text-primary" size={48} />
                                 <h3 className="mt-2">Total del Día</h3>
                                 <p className="display-4 fw-bold text-primary mb-0">{stats.total}</p>
+                                <small className="text-muted">Click para ver detalles</small>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Pedidos Asignados */}
                 <div className="card shadow">
                     <div className="card-header bg-danger text-white">
                         <h4 className="mb-0">
@@ -289,6 +380,123 @@ const Repartidor: React.FC = () => {
                 </div>
             </main>
 
+            {showHistorialModal && (
+                <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                    <div className="modal-dialog modal-xl modal-dialog-scrollable">
+                        <div className="modal-content">
+                            <div className="modal-header bg-danger text-white">
+                                <h5 className="modal-title">
+                                    <Package className="me-2" size={20} />
+                                    {getModalTitle()}
+                                </h5>
+                                <button
+                                    type="button"
+                                    className="btn-close btn-close-white"
+                                    onClick={() => setShowHistorialModal(false)}
+                                ></button>
+                            </div>
+                            <div className="modal-body">
+                                {historialOrders.length === 0 ? (
+                                    <div className="text-center text-muted py-5">
+                                        <Package size={64} className="mb-3" />
+                                        <p className="fs-5">No hay entregas en esta categoría</p>
+                                    </div>
+                                ) : (
+                                    <div className="table-responsive">
+                                        <table className="table table-hover">
+                                            <thead className="table-light">
+                                                <tr>
+                                                    <th>N° Pedido</th>
+                                                    <th>Cliente</th>
+                                                    <th>Dirección</th>
+                                                    <th>Productos</th>
+                                                    <th>Total</th>
+                                                    <th>Estado</th>
+                                                    <th>Fecha</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {historialOrders
+                                                    .sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime())
+                                                    .map(order => (
+                                                    <tr key={order.id}>
+                                                        <td><strong>{order.numeroSolicitud}</strong></td>
+                                                        <td>
+                                                            {order.clienteNombre}<br />
+                                                            <small className="text-muted">{order.telefono}</small>
+                                                        </td>
+                                                        <td>
+                                                            <small>
+                                                                {order.direccion}<br />
+                                                                {order.comuna}
+                                                            </small>
+                                                        </td>
+                                                        <td>
+                                                            <small>
+                                                                {order.productos.map(p => `${p.nombre} (x${p.cantidad})`).join(', ')}
+                                                            </small>
+                                                        </td>
+                                                        <td className="fw-bold text-primary">
+                                                            ${order.total.toLocaleString('es-CL')}
+                                                        </td>
+                                                        <td>
+                                                            <span className={`badge ${getBadgeClass(order.estado)}`}>
+                                                                {order.estado}
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <small>
+                                                                {new Date(order.fecha).toLocaleDateString('es-CL')}
+                                                                <br />
+                                                                {new Date(order.fecha).toLocaleTimeString('es-CL', { 
+                                                                    hour: '2-digit', 
+                                                                    minute: '2-digit' 
+                                                                })}
+                                                            </small>
+                                                            {order.horaEntrega && (
+                                                                <>
+                                                                    <br />
+                                                                    <small className="text-success">
+                                                                        ✓ {new Date(order.horaEntrega).toLocaleTimeString('es-CL', { 
+                                                                            hour: '2-digit', 
+                                                                            minute: '2-digit' 
+                                                                        })}
+                                                                    </small>
+                                                                </>
+                                                            )}
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                )}
+                            </div>
+                            <div className="modal-footer">
+                                <div className="me-auto">
+                                    <strong>Total de entregas:</strong> {historialOrders.length}
+                                    {historialType === 'total' && (
+                                        <span className="ms-3">
+                                            | <strong>Ingresos:</strong> ${historialOrders
+                                                .filter(o => o.estado === 'Entregado')
+                                                .reduce((sum, o) => sum + o.total, 0)
+                                                .toLocaleString('es-CL')}
+                                        </span>
+                                    )}
+                                </div>
+                                <button
+                                    type="button"
+                                    className="btn btn-secondary"
+                                    onClick={() => setShowHistorialModal(false)}
+                                >
+                                    Cerrar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <WhatsAppButton
                 phoneNumber="56912345691"
                 message="Hola, necesito soporte con administración"
@@ -299,7 +507,6 @@ const Repartidor: React.FC = () => {
                 <p className="mb-0">&copy; 2025 MaxiGas - Panel Repartidor</p>
             </footer>
 
-            {/* Sistema de modales personalizados */}
             <CustomModalComponent />
         </div>
     );
