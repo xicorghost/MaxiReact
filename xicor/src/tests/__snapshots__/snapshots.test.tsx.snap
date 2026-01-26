@@ -1,0 +1,312 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Snapshots > OrderCard Snapshot 1`] = `
+<DocumentFragment>
+  <div
+    class="card mb-3 shadow-sm"
+  >
+    <div
+      class="card-header bg-danger text-white d-flex justify-content-between align-items-center"
+    >
+      <span>
+        <strong>
+          Pedido 001
+        </strong>
+      </span>
+      <span
+        class="badge bg-warning text-dark"
+      >
+        Pendiente
+      </span>
+    </div>
+    <div
+      class="card-body"
+    >
+      <div
+        class="row"
+      >
+        <div
+          class="col-md-8"
+        >
+          <p
+            class="mb-2"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-clock me-2"
+              fill="none"
+              height="16"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M12 6v6l4 2"
+              />
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+              />
+            </svg>
+            <strong>
+              Fecha:
+            </strong>
+             Invalid Date
+          </p>
+          <p
+            class="mb-2"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-map-pin me-2"
+              fill="none"
+              height="16"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"
+              />
+              <circle
+                cx="12"
+                cy="10"
+                r="3"
+              />
+            </svg>
+            <strong>
+              Dirección:
+            </strong>
+             , 
+          </p>
+          <p
+            class="mb-2"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-phone me-2"
+              fill="none"
+              height="16"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"
+              />
+            </svg>
+            <strong>
+              Teléfono:
+            </strong>
+             
+          </p>
+          <p
+            class="mb-2"
+          >
+            <strong>
+              Productos:
+            </strong>
+          </p>
+          <ul
+            class="list-unstyled ms-3"
+          />
+        </div>
+        <div
+          class="col-md-4 text-end"
+        >
+          <p
+            class="mb-2"
+          >
+            <strong>
+              Subtotal:
+            </strong>
+             $100
+          </p>
+          <p
+            class="mb-2"
+          >
+            <strong>
+              Envío:
+            </strong>
+             $10
+          </p>
+          <hr />
+          <h5
+            class="text-primary mb-0"
+          >
+            <strong>
+              Total:
+            </strong>
+             $110
+          </h5>
+        </div>
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
+`;
+
+exports[`Snapshots > ProductCard Snapshot 1`] = `
+<DocumentFragment>
+  <div
+    class="col-md-4 mb-4"
+  >
+    <div
+      class="card h-100 shadow-sm hover-shadow transition"
+    >
+      <img
+        alt="Gas 11kg"
+        class="card-img-top p-4"
+        style="height: 250px; object-fit: contain;"
+      />
+      <div
+        class="card-body d-flex flex-column"
+      >
+        <h5
+          class="card-title text-danger fw-bold"
+        >
+          Gas 11kg
+        </h5>
+        <p
+          class="card-text text-muted"
+        >
+          Test
+        </p>
+        <p
+          class="fs-3 fw-bold text-primary mb-2"
+        >
+          $15.000
+        </p>
+        <p
+          class="small mb-3 text-muted"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-package me-1"
+            fill="none"
+            height="16"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"
+            />
+            <path
+              d="M12 22V12"
+            />
+            <polyline
+              points="3.29 7 12 12 20.71 7"
+            />
+            <path
+              d="m7.5 4.27 9 5.15"
+            />
+          </svg>
+          Stock: 10 unidades
+        </p>
+        <div
+          class="mt-auto"
+        >
+          <button
+            class="btn btn-danger w-100"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-shopping-cart me-2"
+              fill="none"
+              height="18"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="18"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="8"
+                cy="21"
+                r="1"
+              />
+              <circle
+                cx="19"
+                cy="21"
+                r="1"
+              />
+              <path
+                d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"
+              />
+            </svg>
+            Agregar al Carrito
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
+`;
+
+exports[`Snapshots > ProtectedRoute Loading Snapshot 1`] = `
+<DocumentFragment>
+  <div
+    class="spinner-border"
+    role="status"
+  />
+</DocumentFragment>
+`;
+
+exports[`Snapshots > ToastProvider UI Snapshot 1`] = `
+<DocumentFragment>
+  <div>
+    Test
+  </div>
+  <div
+    class="toast-container"
+  />
+</DocumentFragment>
+`;
+
+exports[`Snapshots > WhatsAppButton Snapshot 1`] = `
+<DocumentFragment>
+  <button
+    class="position-fixed bottom-0 start-0 m-3 btn btn-success rounded-pill shadow-lg d-flex align-items-center"
+    style="z-index: 1000; background-color: rgb(37, 211, 102); border-color: rgb(37, 211, 102); padding: 12px 24px;"
+  >
+    <svg
+      aria-hidden="true"
+      class="lucide lucide-phone me-2"
+      fill="none"
+      height="20"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      viewBox="0 0 24 24"
+      width="20"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"
+      />
+    </svg>
+    SOPORTE TÉCNICO
+  </button>
+</DocumentFragment>
+`;
